@@ -383,6 +383,19 @@ def get_subscriptions(outfile, folder, out_format):
     if outfile:
         fout.close()
 
+@main.command("add-subscriptions")
+@click.option("-u", "--urlsfile", help="Filename with url for each line")
+@catch_error
+def add_subscriptions(urlsfile):
+    client = get_client()
+    fin = open(urlsfile, 'r')
+    if fin:
+        urls = fin.read().splitlines()
+        client.add_subscriptions(urls)
+        LOGGER.error("All done")
+    else:
+        LOGGER.error("urlsfile is invalid")
+
 
 @main.command("fetch-articles")
 @click.option("-i", "--stream-id", required=True, help='Stream ID which you want to fetch')

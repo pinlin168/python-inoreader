@@ -1,5 +1,6 @@
 # coding: utf-8
 from __future__ import print_function, unicode_literals
+from distutils.log import error
 
 import logging
 from uuid import uuid4
@@ -29,6 +30,7 @@ class InoreaderClient(object):
     USER_INFO_PATH = 'user-info'
     TAG_LIST_PATH = 'tag/list'
     SUBSCRIPTION_LIST_PATH = 'subscription/list'
+    SUBSCRIPTION_QUICKADD_PATH = 'subscription/quickadd'
     STREAM_CONTENTS_PATH = 'stream/contents/'
     EDIT_TAG_PATH = 'edit-tag'
 
@@ -138,6 +140,19 @@ class InoreaderClient(object):
         response = self.parse_response(self.session.get(url, proxies=self.proxies))
         for item in response['subscriptions']:
             yield Subscription.from_json(item)
+    
+    def add_subscriptions(self, urls):
+        self.check_token()
+
+        for urlItem in urls:
+            url = urljoin(BASE_URL, self.SUBSCRIPTION_QUICKADD_PATH)
+            params = {"quickadd": "feed/" + urlItem}
+            response = self.parse_response(self.session.post(url, params=params, proxies=self.proxies))
+            if response['numResults'] == 1:
+                LOGGER.info("Succeed subscript URL:%s", urlItem)
+            else:
+                LOGGER.info("Failed subscript URL:%s", urlItem)
+        
 
     def get_stream_contents(self, stream_id, c=''):
         while True:
